@@ -59,14 +59,50 @@ stages:
     deps:
     - path: models/rf_model.pkl
       hash: md5
-      md5: c08429f9a4499c0a4568e11a70e9dd1a
-      size: 73599748
+      md5: de6316f774c6ff8ab1be9387a9e08f5f
+      size: 73636069
     - path: src/models/model_evaluation.py
       hash: md5
-      md5: 9752a57217dd617bb152dda141a26288
-      size: 1425
+      md5: 38f6bbd68b581d6ca391fd0d6036fc47
+      size: 2653
     outs:
     - path: reports/eval_metrics.json
       hash: md5
-      md5: 82d82c417075ad5d879ce48337f394fa
-      size: 40
+      md5: afebe5e13379375abcfecaa488d6fe84
+      size: 126
+  data_visualization:
+    cmd: python src/visualization/visualization.py
+    deps:
+    - path: data/preprocessing/test_processed.csv
+      hash: md5
+      md5: 6208ecb5989dd7b7e0031d379f3fd42d
+      size: 109438
+    - path: models/rf_model.pkl
+      hash: md5
+      md5: de6316f774c6ff8ab1be9387a9e08f5f
+      size: 73636069
+    - path: reports/eval_metrics.json
+      hash: md5
+      md5: afebe5e13379375abcfecaa488d6fe84
+      size: 126
+    - path: src/visualization/visualization.py
+      hash: md5
+      md5: 8f0e7bd6b56e977dba122050d98b4800
+      size: 5900
+    outs:
+    - path: reports/figures
+      hash: md5
+      md5: 918b3184ab3604f95705f22f8f42f929.dir
+      size: 2328887
+      nfiles: 27
+  deployment:
+    cmd: bash src/deploy/deploy.sh
+    deps:
+    - path: models/rf_model.pkl
+      hash: md5
+      md5: de6316f774c6ff8ab1be9387a9e08f5f
+      size: 73636069
+    - path: src/deploy/deploy.sh
+      hash: md5
+      md5: 4181bcf090ccc133cae2066743af14c4
+      size: 586

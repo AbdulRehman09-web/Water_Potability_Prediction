@@ -33,3 +33,19 @@ stages:
     - src/models/model_evaluation.py
     metrics:
     - reports/eval_metrics.json
+
+  data_visualization:
+    cmd: python src/visualization/visualization.py
+    deps:
+      - src/visualization/visualization.py
+      - data/preprocessing/test_processed.csv
+      - models/rf_model.pkl
+      - reports/eval_metrics.json
+    outs:
+      - reports/figures
+
+  deployment:
+    cmd: bash src/deploy/deploy.sh
+    deps:
+      - src/deploy/deploy.sh
+      - models/rf_model.pkl
