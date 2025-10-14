@@ -1,18 +1,20 @@
 FROM python:3.11-slim
 
-# set workdir
+# Set working directory
 WORKDIR /app
 
-# copy requirements and install
+# Copy requirements file
 COPY src/backend/requirements.txt .
+
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy app code
-COPY src/backend/app.py .
-COPY models ./models
+# Copy app code
+COPY src/backend/app.py . 
+COPY ../models ./models
 
-# expose port
+# Expose FastAPI port
 EXPOSE 8000
 
-# default command
+# Run the FastAPI app
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
