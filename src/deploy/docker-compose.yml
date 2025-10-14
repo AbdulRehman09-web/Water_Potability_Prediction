@@ -1,23 +1,24 @@
-version: "3.8"
 services:
   backend:
     build:
-      context: ../backend
-      dockerfile: Dockerfile
+      context: ../..                 # Project root = water_prediction
+      dockerfile: src/backend/Dockerfile
     image: mlops_backend:latest
     ports:
       - "8000:8000"
     volumes:
-      - ../../models:/app/models:ro   # mount your trained model directory to /app/models
+      - ../../models:/app/models:ro
+    working_dir: /app
     restart: unless-stopped
 
   frontend:
     build:
-      context: ../frontend
-      dockerfile: Dockerfile
+      context: ../..                 # Project root
+      dockerfile: src/frontend/Dockerfile
     image: mlops_frontend:latest
     ports:
       - "8501:8501"
     depends_on:
       - backend
+    working_dir: /app
     restart: unless-stopped
