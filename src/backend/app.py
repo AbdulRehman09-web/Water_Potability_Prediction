@@ -1,19 +1,40 @@
 from fastapi import FastAPI
 import pickle
 import pandas as pd
-from data_model import Water
+from pydantic import BaseModel
 
+# -------------------------------
+# Pydantic model for input data
+# -------------------------------
+class Water(BaseModel):
+    ph: float
+    Hardness: float
+    Solids: float
+    Chloramines: float
+    Sulfate: float
+    Conductivity: float
+    Organic_carbon: float
+    Trihalomethanes: float
+    Turbidity: float
+
+# -------------------------------
 # Initialize FastAPI app
+# -------------------------------
 app = FastAPI(
     title="Water Potability Prediction API",
     description="An API that predicts whether water is potable (safe for drinking) based on water quality parameters.",
     version="1.0"
 )
 
+# -------------------------------
 # Load the trained Random Forest model
-with open(r"C:\Users\HP\Documents\Data Science (Atomcamp)\Python\Mlops_Project\rf_model.pkl", "rb") as model_file:
+# -------------------------------
+with open("models/rf_model.pkl", "rb") as model_file:
     model = pickle.load(model_file)
 
+# -------------------------------
+# API endpoints
+# -------------------------------
 @app.get("/")
 def index():
     return {"message": "Welcome to the Water Potability Prediction API! Use the /predict endpoint to check water safety."}
@@ -23,7 +44,6 @@ def predict_potability(water: Water):
     """
     Predict whether the given water sample is potable (1) or not (0).
     """
-
     try:
         # Convert input data into a DataFrame
         sample = pd.DataFrame([{

@@ -4,11 +4,12 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # copy requirements and install
-COPY requirements.txt .
+COPY src/backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # copy app code
-COPY app.py .
+COPY src/backend/app.py .
+COPY models ./models
 
 # expose port
 EXPOSE 8000
