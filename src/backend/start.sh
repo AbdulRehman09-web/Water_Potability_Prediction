@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> 7fb0573292fc99580be0c68f8b490d32727221b4
 #!/bin/bash
 
 echo "Water Potability Prediction"
