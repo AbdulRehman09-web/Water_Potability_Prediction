@@ -1,3 +1,6 @@
+
+#!/bin/bash
+
 echo "Water Potability Prediction"
 
 echo "Downloading the model"
