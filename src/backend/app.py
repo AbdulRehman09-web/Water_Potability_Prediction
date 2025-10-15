@@ -62,7 +62,7 @@ model_info = {}
 def load_model():
     global model, model_info
     try:
-        model_path = Path("models/rf_model.pkl")
+        model_path = Path("rf_model.pkl")
 
         if not model_path.exists():
             raise FileNotFoundError(f"Model file '{model_path}' not found.")
