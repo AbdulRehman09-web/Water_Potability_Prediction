@@ -5,8 +5,3 @@ wandb==0.22.2
 fastapi==0.111.1
 uvicorn==0.30.6
 pathlib
-<<<<<<< HEAD
-# python-multipart==0.0.6
-=======
-# python-multipart==0.0.6
->>>>>>> 7fb0573292fc99580be0c68f8b490d32727221b4
