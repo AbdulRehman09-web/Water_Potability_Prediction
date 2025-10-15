@@ -1,10 +1,40 @@
-from fastapi import FastAPI
-import pickle
-import pandas as pd
+from importlib import reload
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pathlib import Path
+import pandas as pd
+import pickle
+import logging
 
 # -------------------------------
-# Pydantic model for input data
+# Logging setup
+# -------------------------------
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# -------------------------------
+# Initialize FastAPI app
+# -------------------------------
+app = FastAPI(
+    title="Water Potability Prediction API",
+    version="1.0",
+    description="An API that predicts whether water is potable (safe for drinking) based on quality parameters."
+)
+
+# -------------------------------
+# Enable CORS
+# -------------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],       # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# -------------------------------
+# Pydantic models
 # -------------------------------
 class Water(BaseModel):
     ph: float
@@ -17,35 +47,81 @@ class Water(BaseModel):
     Trihalomethanes: float
     Turbidity: float
 
-# -------------------------------
-# Initialize FastAPI app
-# -------------------------------
-app = FastAPI(
-    title="Water Potability Prediction API",
-    description="An API that predicts whether water is potable (safe for drinking) based on water quality parameters.",
-    version="1.0"
-)
+
+class PredictionResponse(BaseModel):
+    prediction: int
+    result: str
+
 
 # -------------------------------
-# Load the trained Random Forest model
+# Model loading
 # -------------------------------
-with open("models/rf_model.pkl", "rb") as model_file:
-    model = pickle.load(model_file)
+model = None
+model_info = {}
+
+def load_model():
+    global model, model_info
+    try:
+        model_path = Path("models/rf_model.pkl")
+
+        if not model_path.exists():
+            raise FileNotFoundError(f"Model file '{model_path}' not found.")
+
+        with open(model_path, "rb") as model_file:
+            model = pickle.load(model_file)
+
+        model_info = {
+            "model_path": str(model_path),
+            "model_type": "Random Forest Classifier",
+            "target": "Water Potability"
+        }
+
+        logger.info(f"✅ Model loaded successfully from {model_path}")
+        return True
+
+    except Exception as e:
+        logger.error(f"❌ Error loading model: {e}")
+        return False
+
 
 # -------------------------------
-# API endpoints
+# Startup event
+# -------------------------------
+@app.on_event("startup")
+async def startup_event():
+    success = load_model()
+    if not success:
+        logger.error("Failed to load model on startup.")
+    else:
+        logger.info("Model loaded and ready for predictions.")
+
+
+# -------------------------------
+# API routes
 # -------------------------------
 @app.get("/")
-def index():
-    return {"message": "Welcome to the Water Potability Prediction API! Use the /predict endpoint to check water safety."}
+async def root():
+    return {
+        "message": "🚰 Water Potability Prediction API is running.",
+        "model_info": model_info,
+        "model_loaded": model is not None
+    }
 
-@app.post("/predict")
-def predict_potability(water: Water):
-    """
-    Predict whether the given water sample is potable (1) or not (0).
-    """
+
+@app.get("/health")
+async def health_check():
+    if model is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+    return {"status": "healthy", "model_loaded": True}
+
+
+@app.post("/predict", response_model=PredictionResponse)
+async def predict_potability(water: Water):
+    if model is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+
     try:
-        # Convert input data into a DataFrame
+        # Prepare input data as a DataFrame
         sample = pd.DataFrame([{
             'ph': water.ph,
             'Hardness': water.Hardness,
@@ -60,14 +136,21 @@ def predict_potability(water: Water):
 
         # Make prediction
         prediction = model.predict(sample)[0]
-
-        # Interpret result
         result = "Water is Consumable" if prediction == 1 else "Water is Not Consumable"
 
-        return {
-            "prediction": int(prediction),
-            "result": result
-        }
+        return PredictionResponse(
+            prediction=int(prediction),
+            result=result
+        )
 
     except Exception as e:
-        return {"error": f"Prediction failed: {str(e)}"}
+        logger.error(f"Prediction error: {e}")
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+
+
+# -------------------------------
+# Run with Uvicorn
+# -------------------------------
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
