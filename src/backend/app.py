@@ -60,9 +60,8 @@ model_info = {}
 def load_model():
     global model, model_info
     try:
-<<<<<<< HEAD
         model_path = Path("rf_model.pkl")
-=======
+
         # Base directory of this file (src/backend/)
         base_dir = Path(__file__).resolve().parent
 
@@ -71,7 +70,6 @@ def load_model():
 
         # Log the resolved path for debugging
         logger.info(f"Looking for model at: {model_path}")
->>>>>>> 7fb0573292fc99580be0c68f8b490d32727221b4
 
         if not model_path.exists():
             raise FileNotFoundError(f"Model file '{model_path}' not found.")
