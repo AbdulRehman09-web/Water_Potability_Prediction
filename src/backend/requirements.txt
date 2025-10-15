@@ -1,6 +1,7 @@
 scikit-learn==1.4.2
 numpy==1.26.4
 pandas==2.2.2
+wandb==0.22.2
 fastapi==0.111.1
 uvicorn==0.30.6
 # python-multipart==0.0.6
