@@ -1,3 +1,7 @@
 streamlit==1.28.0
 requests==2.31.0
+<<<<<<< HEAD
 python-dotenv
+=======
+python-dotenv
+>>>>>>> 7fb0573292fc99580be0c68f8b490d32727221b4

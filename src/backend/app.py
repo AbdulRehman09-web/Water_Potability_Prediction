@@ -27,7 +27,7 @@ app = FastAPI(
 # -------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],       # Allow all origins
+    allow_origins=["*"],  # Allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,11 +47,9 @@ class Water(BaseModel):
     Trihalomethanes: float
     Turbidity: float
 
-
 class PredictionResponse(BaseModel):
     prediction: int
     result: str
-
 
 # -------------------------------
 # Model loading
@@ -62,7 +60,18 @@ model_info = {}
 def load_model():
     global model, model_info
     try:
+<<<<<<< HEAD
         model_path = Path("rf_model.pkl")
+=======
+        # Base directory of this file (src/backend/)
+        base_dir = Path(__file__).resolve().parent
+
+        # Go two levels up to reach project root -> models/rf_model.pkl
+        model_path = base_dir.parent.parent / "models" / "rf_model.pkl"
+
+        # Log the resolved path for debugging
+        logger.info(f"Looking for model at: {model_path}")
+>>>>>>> 7fb0573292fc99580be0c68f8b490d32727221b4
 
         if not model_path.exists():
             raise FileNotFoundError(f"Model file '{model_path}' not found.")
@@ -83,7 +92,6 @@ def load_model():
         logger.error(f"❌ Error loading model: {e}")
         return False
 
-
 # -------------------------------
 # Startup event
 # -------------------------------
@@ -94,7 +102,6 @@ async def startup_event():
         logger.error("Failed to load model on startup.")
     else:
         logger.info("Model loaded and ready for predictions.")
-
 
 # -------------------------------
 # API routes
@@ -107,13 +114,11 @@ async def root():
         "model_loaded": model is not None
     }
 
-
 @app.get("/health")
 async def health_check():
     if model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
     return {"status": "healthy", "model_loaded": True}
-
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict_potability(water: Water):
@@ -146,7 +151,6 @@ async def predict_potability(water: Water):
     except Exception as e:
         logger.error(f"Prediction error: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
-
 
 # -------------------------------
 # Run with Uvicorn
